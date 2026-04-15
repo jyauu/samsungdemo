@@ -178,21 +178,37 @@ export const AnalyticsInterface = () => {
           <p className="dashboard-subtitle">{sub.title} • @{sub.creatorName}</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          {analytics.isMock !== undefined && (
+          {(sub.liveLinks && analytics.isMock !== false) ? (
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
               gap: '0.4rem', 
               padding: '0.4rem 0.8rem', 
-              background: analytics.isMock ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)', 
-              color: analytics.isMock ? '#f87171' : '#4ade80',
+              background: 'rgba(239, 68, 68, 0.1)', 
+              color: '#f87171',
               borderRadius: '2rem',
               fontSize: '0.8rem',
               fontWeight: 600,
-              border: `1px solid ${analytics.isMock ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`
+              border: '1px solid rgba(239, 68, 68, 0.2)'
             }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }} />
-              {analytics.isMock ? 'SIMULATED DATA' : 'LIVE DATA'}
+              SIMULATED DATA
+            </div>
+          ) : analytics.isMock === false && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.4rem', 
+              padding: '0.4rem 0.8rem', 
+              background: 'rgba(34, 197, 94, 0.1)', 
+              color: '#4ade80',
+              borderRadius: '2rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              border: '1px solid rgba(34, 197, 94, 0.2)'
+            }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }} />
+              LIVE DATA
             </div>
           )}
           <Button variant="secondary" onClick={() => setIsEditing(true)}>Edit Links</Button>
