@@ -110,7 +110,7 @@ export const AnalyticsInterface = () => {
       if (match) embedUrl = `https://www.tiktok.com/embed/v2/${match[1]}`;
     } else if (platform === 'instagram') {
       const cleanLink = link.split('?')[0].replace(/\/$/, ""); 
-      embedUrl = `${cleanLink}/embed`;
+      embedUrl = `https://www.instagram.com/p/${cleanLink.split('/').pop()}/embed/captioned/`;
     }
 
     const totalEngagements = (stats.likes || 0) + (stats.comments || 0) + (stats.saves || 0) + (stats.shares || 0);
@@ -125,15 +125,25 @@ export const AnalyticsInterface = () => {
         </h2>
         
         {embedUrl && (
-          <div style={{ marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', height: '600px', position: 'relative', background: '#000' }}>
+          <div style={{ marginBottom: '1.5rem', borderRadius: '12px', overflow: 'hidden', height: '600px', position: 'relative', background: '#000', border: '1px solid var(--border-light)' }}>
             <iframe 
               src={embedUrl} 
+              title={`${platform} embed`}
               style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
               scrolling="no"
               allowtransparency="true"
             />
           </div>
         )}
+        
+        <Button 
+          variant="outline" 
+          fullWidth 
+          style={{ marginBottom: '2rem' }}
+          onClick={() => window.open(link, '_blank')}
+        >
+          View Original {platform === 'tiktok' ? 'TikTok' : 'Instagram Post'}
+        </Button>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '2rem' }}>
           <StatCard title="Total Views" value={(stats.views || 0).toLocaleString()} icon={Play} colorClass="status-approved" />
@@ -167,7 +177,24 @@ export const AnalyticsInterface = () => {
           </h1>
           <p className="dashboard-subtitle">{sub.title} • @{sub.creatorName}</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          {analytics.isMock !== undefined && (
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.4rem', 
+              padding: '0.4rem 0.8rem', 
+              background: analytics.isMock ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)', 
+              color: analytics.isMock ? '#f87171' : '#4ade80',
+              borderRadius: '2rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              border: `1px solid ${analytics.isMock ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`
+            }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }} />
+              {analytics.isMock ? 'SIMULATED DATA' : 'LIVE DATA'}
+            </div>
+          )}
           <Button variant="secondary" onClick={() => setIsEditing(true)}>Edit Links</Button>
         </div>
       </div>

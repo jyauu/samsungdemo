@@ -87,7 +87,7 @@ export default async function handler(req, res) {
         // If no token, return fallback immediately
         if (!process.env.APIFY_API_TOKEN) {
             console.warn("[Vercel Serverless] APIFY_API_TOKEN not set. Using mock fallbacks.");
-            return res.status(200).json(getFallbackStats());
+            return res.status(200).json({ ...getFallbackStats(), isMock: true });
         }
 
         let stats;
@@ -99,10 +99,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Unsupported URL. Use TikTok or Instagram." });
         }
 
-        return res.status(200).json(stats);
+        return res.status(200).json({ ...stats, isMock: false });
     } catch (e) {
         console.error(`[Vercel Serverless Error]`, e);
         // Fallback gracefully on error so the UI still displays data
-        return res.status(200).json(getFallbackStats());
+        return res.status(200).json({ ...getFallbackStats(), isMock: true });
     }
 }
