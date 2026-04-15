@@ -1,5 +1,3 @@
-import { ApifyClient } from 'apify-client/browser';
-
 // Standardized fallback metrics format
 const getFallbackStats = () => ({
   views: Math.floor(Math.random() * 80000) + 20000,
@@ -10,52 +8,43 @@ const getFallbackStats = () => ({
   followerCount: 154000
 });
 
-async function scrapeTikTokApify(client, url) {
-    const input = {
-        postURLs: [url],
-        resultsPerPage: 1,
-        shouldDownloadCovers: false,
-        shouldDownloadVideos: false,
-    };
-    const run = await client.actor("clockworks/tiktok-scraper").call(input);
-    const { items } = await client.dataset(run.defaultDatasetId).listItems();
-    
-    if (items && items.length > 0) {
-        const data = items[0];
-        return {
-             views: data.playCount || data.views || 0,
-             likes: data.diggCount || data.likes || 0,
-             comments: data.commentCount || data.comments || 0,
-             saves: data.collectCount || data.saves || 0,
-             shares: data.shareCount || data.shares || 0,
-             followerCount: data.authorMeta?.fans || data.authorMeta?.followerCount || 100000
-        };
-    }
-    throw new Error("No items returned from Apify TikTok Scraper");
-}
+/**
+ * Native Fetch implementation to avoid apify-client bundling issues
+ */
+async function callApifyActor(actorId, token, input) {
+    const runResponse = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs?token=${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input)
+    });
 
-async function scrapeInstagramApify(client, url) {
-    const input = {
-        directUrls: [url],
-        resultsType: "details",
-        resultsLimit: 1,
-    };
-    const run = await client.actor("apify/instagram-scraper").call(input);
-    const { items } = await client.dataset(run.defaultDatasetId).listItems();
-
-    if (items && items.length > 0) {
-        const data = items[0];
-        const fallbacks = getFallbackStats();
-        return {
-            views: data.videoPlayCount || data.videoViewCount || data.views || 0,
-            likes: data.likesCount || data.likes || 0,
-            comments: data.commentsCount || data.comments || 0,
-            saves: fallbacks.saves,
-            shares: fallbacks.shares,
-            followerCount: data.ownerHasFollowers || fallbacks.followerCount
-        };
+    if (!runResponse.ok) {
+        const errText = await runResponse.text();
+        throw new Error(`Apify Run Failed: ${runResponse.status} - ${errText}`);
     }
-    throw new Error("No items returned from Apify Instagram Scraper");
+
+    const runData = await runResponse.json();
+    const runId = runData.data.id;
+    const defaultDatasetId = runData.data.defaultDatasetId;
+
+    // Poll for completion (Max 30 seconds)
+    let finished = false;
+    let attempts = 0;
+    while (!finished && attempts < 15) {
+        await new Promise(r => setTimeout(r, 2000));
+        const statusResponse = await fetch(`https://api.apify.com/v2/acts/${actorId}/runs/${runId}?token=${token}`);
+        const statusData = await statusResponse.json();
+        if (statusData.data.status === 'SUCCEEDED') {
+            finished = true;
+        } else if (['FAILED', 'ABORTED', 'TIMED-OUT'].includes(statusData.data.status)) {
+            throw new Error(`Apify Job ${statusData.data.status}`);
+        }
+        attempts++;
+    }
+
+    // Get results
+    const datasetResponse = await fetch(`https://api.apify.com/v2/datasets/${defaultDatasetId}/items?token=${token}`);
+    return await datasetResponse.json();
 }
 
 export default async function handler(req, res) {
@@ -65,71 +54,71 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
-    if (req.method === 'OPTIONS') {
-        return res.status(200).end();
-    }
+    if (req.method === 'OPTIONS') return res.status(200).end();
 
     const { url } = req.query;
     if (!url) return res.status(400).json({ error: "Missing link" });
 
-    // Move token detection inside the handler for better reliability on Vercel
-    // Smart detection: Try multiple common names
+    const token = process.env.APIFY_API_TOKEN || process.env.APIFY_TOKEN;
     const allEnvKeys = Object.keys(process.env);
     const apifyKeys = allEnvKeys.filter(k => k.toLowerCase().includes('apify'));
-    
-    // Attempt to find the best token from available keys
-    let token = process.env.APIFY_API_TOKEN || process.env.APIFY_TOKEN || process.env.APIFY_API_KEY;
-    
-    // If not found by exact name, try finding any key that looks like it (case insensitive)
-    if (!token && apifyKeys.length > 0) {
-        token = process.env[apifyKeys[0]];
-    }
-
     const tokenLength = token ? token.length : 0;
 
     try {
-        console.log(`[Vercel Serverless] Scrape job for: ${url}. Token length detected: ${tokenLength}`);
-        
-        // If no token or suspiciously short token, return fallback immediately
         if (!token || tokenLength < 10) {
-            console.warn("[Vercel Serverless] APIFY_API_TOKEN missing or invalid. Using mock fallbacks.");
             return res.status(200).json({ 
                 ...getFallbackStats(), 
                 isMock: true, 
-                debug: { 
-                    tokenFound: !!token, 
-                    tokenLength,
-                    detectedApifyKeys: apifyKeys,
-                    allEnvKeys: allEnvKeys
-                } 
+                debug: { tokenFound: !!token, tokenLength, detectedApifyKeys: apifyKeys, allEnvKeys } 
             });
         }
 
-        // Initialize client only when we have a valid token
-        const client = new ApifyClient({ token });
-
-        let stats;
+        let items;
         if (url.includes('tiktok.com')) {
-            stats = await scrapeTikTokApify(client, url);
+            items = await callApifyActor("clockworks/tiktok-scraper", token, {
+                postURLs: [url],
+                resultsPerPage: 1
+            });
+            if (items && items.length > 0) {
+                const data = items[0];
+                return res.status(200).json({
+                    views: data.playCount || data.views || 0,
+                    likes: data.diggCount || data.likes || 0,
+                    comments: data.commentCount || data.comments || 0,
+                    saves: data.collectCount || data.saves || 0,
+                    shares: data.shareCount || data.shares || 0,
+                    followerCount: data.authorMeta?.fans || 100000,
+                    isMock: false
+                });
+            }
         } else if (url.includes('instagram.com')) {
-            stats = await scrapeInstagramApify(client, url);
-        } else {
-            return res.status(400).json({ error: "Unsupported URL. Use TikTok or Instagram." });
+            items = await callApifyActor("apify/instagram-scraper", token, {
+                directUrls: [url],
+                resultsType: "details",
+                resultsLimit: 1
+            });
+            if (items && items.length > 0) {
+                const data = items[0];
+                const falls = getFallbackStats();
+                return res.status(200).json({
+                    views: data.videoPlayCount || data.videoViewCount || data.views || 0,
+                    likes: data.likesCount || data.likes || 0,
+                    comments: data.commentsCount || data.comments || 0,
+                    saves: falls.saves,
+                    shares: falls.shares,
+                    followerCount: data.ownerHasFollowers || falls.followerCount,
+                    isMock: false
+                });
+            }
         }
 
-        return res.status(200).json({ ...stats, isMock: false });
+        throw new Error("No data returned from Apify");
     } catch (e) {
-        console.error(`[Vercel Serverless Error]`, e);
-        // Fallback gracefully on error
+        console.error(`[Scrape Error]`, e);
         return res.status(200).json({ 
             ...getFallbackStats(), 
             isMock: true, 
-            debug: { 
-                tokenFound: !!token, 
-                tokenLength,
-                detectedApifyKeys: apifyKeys,
-                allEnvKeys: allEnvKeys
-            },
+            debug: { tokenFound: !!token, tokenLength, detectedApifyKeys: apifyKeys, allEnvKeys },
             debugError: e.message 
         });
     }
