@@ -113,9 +113,9 @@ export const AnalyticsInterface = () => {
       embedUrl = `${cleanLink}/embed`;
     }
 
-    const totalEngagements = stats.likes + stats.comments + stats.saves + stats.shares;
-    const erReach = stats.views > 0 ? ((totalEngagements / stats.views) * 100).toFixed(2) : 0;
-    const erAudience = ((totalEngagements / stats.followerCount) * 100).toFixed(2);
+    const totalEngagements = (stats.likes || 0) + (stats.comments || 0) + (stats.saves || 0) + (stats.shares || 0);
+    const erReach = (stats.views > 0) ? ((totalEngagements / stats.views) * 100).toFixed(2) : '0.00';
+    const erAudience = (stats.followerCount > 0) ? ((totalEngagements / stats.followerCount) * 100).toFixed(2) : '0.00';
 
     return (
       <div style={{ flex: 1, minWidth: '350px', background: 'var(--glass-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
@@ -136,7 +136,7 @@ export const AnalyticsInterface = () => {
         )}
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '2rem' }}>
-          <StatCard title="Total Views" value={stats.views.toLocaleString()} icon={Play} colorClass="status-approved" />
+          <StatCard title="Total Views" value={(stats.views || 0).toLocaleString()} icon={Play} colorClass="status-approved" />
           <StatCard title="ER (Reach)" value={`${erReach}%`} icon={TrendingUp} colorClass="accent-teal" subtitle="Engagements / Impressions" />
           <StatCard title="ER (Audience)" value={`${erAudience}%`} icon={Users} colorClass="accent-purple" subtitle="Engagements / Followers" />
         </div>
@@ -145,10 +145,10 @@ export const AnalyticsInterface = () => {
           Engagement Breakdown
         </h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-          <StatCard title="Likes" value={stats.likes.toLocaleString()} icon={Heart} colorClass="status-danger" />
-          <StatCard title="Comments" value={stats.comments.toLocaleString()} icon={MessageCircle} colorClass="accent-teal" />
-          <StatCard title="Saves" value={stats.saves.toLocaleString()} icon={Bookmark} colorClass="status-pending" />
-          <StatCard title="Shares" value={stats.shares.toLocaleString()} icon={Share2} colorClass="accent-purple" />
+          <StatCard title="Likes" value={(stats.likes || 0).toLocaleString()} icon={Heart} colorClass="status-danger" />
+          <StatCard title="Comments" value={(stats.comments || 0).toLocaleString()} icon={MessageCircle} colorClass="accent-teal" />
+          <StatCard title="Saves" value={(stats.saves || 0).toLocaleString()} icon={Bookmark} colorClass="status-pending" />
+          <StatCard title="Shares" value={(stats.shares || 0).toLocaleString()} icon={Share2} colorClass="accent-purple" />
         </div>
       </div>
     );
@@ -165,7 +165,7 @@ export const AnalyticsInterface = () => {
           <h1 className="dashboard-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Activity size={24} color="var(--accent-teal)" /> Campaign Analytics
           </h1>
-          <p className="dashboard-subtitle">{sub.title} • @{sub.influencerName}</p>
+          <p className="dashboard-subtitle">{sub.title} • @{sub.creatorName}</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Button variant="secondary" onClick={() => setIsEditing(true)}>Edit Links</Button>

@@ -181,7 +181,8 @@ export const AppProvider = ({ children }) => {
       status: 'Pending',
       submittedAt: new Date().toISOString(),
       feedback: [],
-      liveLinks: null
+      liveLinks: null,
+      analytics: {}
     };
     setSubmissions([newSub, ...submissions]);
   };

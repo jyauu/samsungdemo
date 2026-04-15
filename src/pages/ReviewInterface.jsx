@@ -66,7 +66,7 @@ export const ReviewInterface = () => {
           <div>
             <h1 className="dashboard-title" style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{sub.title}</h1>
             <div className="submission-meta" style={{ marginBottom: '0.5rem' }}>
-              <span style={{ color: 'var(--accent-purple)' }}>@{sub.influencerName} • {sub.campaign}</span>
+              <span style={{ color: 'var(--accent-purple)' }}>@{sub.creatorName} • {sub.campaign}</span>
             </div>
             {sub.postingDate && (
               <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)', background: 'var(--glass-bg)', padding: '0.35rem 0.75rem', borderRadius: '0.5rem', display: 'inline-block', border: '1px solid var(--border-light)' }}>
