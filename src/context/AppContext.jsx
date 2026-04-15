@@ -280,7 +280,9 @@ export const AppProvider = ({ children }) => {
         return {
           ...sub,
           isScraping: false,
-          analytics: (newAnalytics.tiktok || newAnalytics.instagram) ? newAnalytics : (sub.analytics || {})
+          analytics: (newAnalytics.tiktok || newAnalytics.instagram) 
+            ? { ...newAnalytics, isMock: (newAnalytics.tiktok?.isMock || newAnalytics.instagram?.isMock || false) } 
+            : (sub.analytics || {})
         };
       }
       return sub;
