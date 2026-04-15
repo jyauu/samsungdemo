@@ -215,6 +215,25 @@ export const AnalyticsInterface = () => {
         </div>
       </div>
 
+      {analytics.isMock && analytics.debug && (
+        <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.85rem' }}>
+          <div style={{ fontWeight: 600, color: '#f87171', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Activity size={14} /> Diagnostic Info: Token Not Detected
+          </div>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            The server searched for <code>APIFY_API_TOKEN</code> but found <code>{analytics.debug.tokenFound ? 'Invalid/Short' : 'Nothing'}</code>.
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>Keys starting with APIFY:</span>
+            {analytics.debug.detectedApifyKeys?.length > 0 ? (
+              analytics.debug.detectedApifyKeys.map(k => <code key={k} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>{k}</code>)
+            ) : (
+              <span style={{ fontStyle: 'italic', opacity: 0.5 }}>None found</span>
+            )}
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'stretch' }}>
          {(!analytics.tiktok && !analytics.instagram) ? (
            <div style={{ width: '100%', padding: '4rem 2rem', textAlign: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--border-light)' }}>

@@ -76,6 +76,10 @@ export default async function handler(req, res) {
     const token = process.env.APIFY_API_TOKEN;
     const tokenLength = token ? token.length : 0;
 
+    // Diagnostic: Check for ANY mention of Apify in the environment
+    const allEnvKeys = Object.keys(process.env);
+    const apifyKeys = allEnvKeys.filter(k => k.toLowerCase().includes('apify'));
+
     try {
         console.log(`[Vercel Serverless] Scrape job for: ${url}. Token length detected: ${tokenLength}`);
         
@@ -85,7 +89,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ 
                 ...getFallbackStats(), 
                 isMock: true, 
-                debug: { tokenFound: !!token, tokenLength } 
+                debug: { 
+                    tokenFound: !!token, 
+                    tokenLength,
+                    detectedApifyKeys: apifyKeys 
+                } 
             });
         }
 
