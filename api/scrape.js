@@ -73,12 +73,19 @@ export default async function handler(req, res) {
     if (!url) return res.status(400).json({ error: "Missing link" });
 
     // Move token detection inside the handler for better reliability on Vercel
-    const token = process.env.APIFY_API_TOKEN;
-    const tokenLength = token ? token.length : 0;
-
-    // Diagnostic: Check for ANY mention of Apify in the environment
+    // Smart detection: Try multiple common names
     const allEnvKeys = Object.keys(process.env);
     const apifyKeys = allEnvKeys.filter(k => k.toLowerCase().includes('apify'));
+    
+    // Attempt to find the best token from available keys
+    let token = process.env.APIFY_API_TOKEN || process.env.APIFY_TOKEN || process.env.APIFY_API_KEY;
+    
+    // If not found by exact name, try finding any key that looks like it (case insensitive)
+    if (!token && apifyKeys.length > 0) {
+        token = process.env[apifyKeys[0]];
+    }
+
+    const tokenLength = token ? token.length : 0;
 
     try {
         console.log(`[Vercel Serverless] Scrape job for: ${url}. Token length detected: ${tokenLength}`);
