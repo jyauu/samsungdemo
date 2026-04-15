@@ -220,6 +220,7 @@ export const AnalyticsInterface = () => {
           <div style={{ fontWeight: 800, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
             <Activity size={18} /> SYSTEM DIAGNOSTICS: SIMULATED MODE ACTIVE
           </div>
+          <div style={{ fontSize: '0.7rem', opacity: 0.6, marginBottom: '1rem' }}>Build Ver: {new Date().toLocaleTimeString()} (EST)</div>
           <p style={{ marginBottom: '1rem', fontSize: '0.95rem', fontWeight: 500 }}>
             The server could not verify your <code>APIFY_API_TOKEN</code>. Details detected by server:
           </p>
