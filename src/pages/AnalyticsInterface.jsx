@@ -228,6 +228,11 @@ export const AnalyticsInterface = () => {
              <li><strong>Token Found:</strong> {analytics.debug?.tokenFound ? 'Yes (but invalid/too short)' : 'No (Server sees nothing)'}</li>
              <li><strong>Token Length:</strong> {analytics.debug?.tokenLength || 0} characters</li>
              <li><strong>Possible Key Mappings:</strong> {analytics.debug?.detectedApifyKeys?.join(', ') || 'None found'}</li>
+             {analytics.debugError && (
+               <li style={{ color: '#d32f2f', marginTop: '0.5rem' }}>
+                 <strong>Server Error:</strong> <code>{analytics.debugError}</code>
+               </li>
+             )}
           </ul>
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
             <span style={{ color: 'var(--text-secondary)' }}>All Detected Keys:</span>
