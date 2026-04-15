@@ -99,7 +99,8 @@ export default async function handler(req, res) {
                 debug: { 
                     tokenFound: !!token, 
                     tokenLength,
-                    detectedApifyKeys: apifyKeys 
+                    detectedApifyKeys: apifyKeys,
+                    allEnvKeys: allEnvKeys
                 } 
             });
         }

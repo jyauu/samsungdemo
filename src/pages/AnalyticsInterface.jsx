@@ -228,9 +228,14 @@ export const AnalyticsInterface = () => {
              <li><strong>Token Length:</strong> {analytics.debug?.tokenLength || 0} characters</li>
              <li><strong>Possible Key Mappings:</strong> {analytics.debug?.detectedApifyKeys?.join(', ') || 'None found'}</li>
           </ul>
-          <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>
-            <em>If "Token Found" is No, please ensure the variable is named exactly <code>APIFY_API_TOKEN</code> in Vercel and that the "Preview" environment box is checked.</em>
-          </p>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+            <span style={{ color: 'var(--text-secondary)' }}>All Detected Keys:</span>
+            {analytics.debug?.allEnvKeys?.length > 0 ? (
+              analytics.debug.allEnvKeys.filter(k => k.length < 30).map(k => <code key={k} style={{ background: 'rgba(0,0,0,0.05)', padding: '0.1rem 0.3rem', borderRadius: '4px', fontSize: '0.7rem' }}>{k}</code>)
+            ) : (
+              <span style={{ fontStyle: 'italic', opacity: 0.5 }}>None found</span>
+            )}
+          </div>
         </div>
       )}
 
