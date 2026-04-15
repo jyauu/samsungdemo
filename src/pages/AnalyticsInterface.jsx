@@ -215,22 +215,22 @@ export const AnalyticsInterface = () => {
         </div>
       </div>
 
-      {analytics.isMock && analytics.debug && (
-        <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.1)', fontSize: '0.85rem' }}>
-          <div style={{ fontWeight: 600, color: '#f87171', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Activity size={14} /> Diagnostic Info: Token Not Detected
+      {analytics.isMock && (
+        <div style={{ marginBottom: '2rem', padding: '1.5rem', background: '#fff9c4', borderRadius: '8px', border: '2px solid #fbc02d', color: '#000' }}>
+          <div style={{ fontWeight: 800, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
+            <Activity size={18} /> SYSTEM DIAGNOSTICS: SIMULATED MODE ACTIVE
           </div>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-            The server searched for <code>APIFY_API_TOKEN</code> but found <code>{analytics.debug.tokenFound ? 'Invalid/Short' : 'Nothing'}</code>.
+          <p style={{ marginBottom: '1rem', fontSize: '0.95rem', fontWeight: 500 }}>
+            The server could not verify your <code>APIFY_API_TOKEN</code>. Details detected by server:
           </p>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Keys starting with APIFY:</span>
-            {analytics.debug.detectedApifyKeys?.length > 0 ? (
-              analytics.debug.detectedApifyKeys.map(k => <code key={k} style={{ background: 'rgba(255,255,255,0.05)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>{k}</code>)
-            ) : (
-              <span style={{ fontStyle: 'italic', opacity: 0.5 }}>None found</span>
-            )}
-          </div>
+          <ul style={{ margin: '0 0 1rem 1.5rem', padding: 0 }}>
+             <li><strong>Token Found:</strong> {analytics.debug?.tokenFound ? 'Yes (but invalid/too short)' : 'No (Server sees nothing)'}</li>
+             <li><strong>Token Length:</strong> {analytics.debug?.tokenLength || 0} characters</li>
+             <li><strong>Possible Key Mappings:</strong> {analytics.debug?.detectedApifyKeys?.join(', ') || 'None found'}</li>
+          </ul>
+          <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+            <em>If "Token Found" is No, please ensure the variable is named exactly <code>APIFY_API_TOKEN</code> in Vercel and that the "Preview" environment box is checked.</em>
+          </p>
         </div>
       )}
 
