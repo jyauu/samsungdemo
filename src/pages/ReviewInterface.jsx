@@ -30,7 +30,11 @@ export const ReviewInterface = () => {
       .map(([target, note]) => ({ target, note }));
 
     updateSubmissionStatus(id, status, newFeedbackItems);
-    navigate('/agency');
+    if (status === 'Approved') {
+       navigate(`/analytics/${id}`);
+    } else {
+       navigate('/agency');
+    }
   };
 
   // Helper to filter existing global feedback for a specific target

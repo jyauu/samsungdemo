@@ -73,6 +73,10 @@ export const SharedWorkspace = () => {
   const handleStatusCommit = (status) => {
      updateSubmissionStatus(sub.id, status);
      triggerMockEmail(role === 'agency' ? 'Agency Reviewer' : 'Daiki Shinomiya', `officially updated the campaign status to: ${status}.`);
+     
+     if (status === 'Approved') {
+        navigate(`/analytics/${sub.id}`);
+     }
   };
 
   // Mock handling of file upload for revision
