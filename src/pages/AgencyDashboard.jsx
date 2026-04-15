@@ -219,8 +219,8 @@ export const AgencyDashboard = () => {
         </div>
       )}
 
-      {activeTab === 'existing' && activeCampaignViewId && (() => {
-         const camp = activeCampaigns.find(c => c.id === activeCampaignViewId);
+      {activeCampaignViewId && (() => {
+         const camp = campaigns.find(c => c.id === activeCampaignViewId);
          if (!camp) return null;
          const campSubs = submissions.filter(s => s.campaignId === camp.id);
          const isEditing = editingCampId === camp.id;
@@ -361,7 +361,7 @@ export const AgencyDashboard = () => {
          );
       })()}
 
-      {activeTab === 'completed' && (
+      {activeTab === 'completed' && !activeCampaignViewId && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {completedCampaigns.length === 0 ? <p>No completed campaigns yet.</p> : completedCampaigns.map(camp => {
              const campSubs = submissions.filter(s => s.campaignId === camp.id && s.status === 'Approved');
@@ -372,19 +372,19 @@ export const AgencyDashboard = () => {
                   <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginTop: '1rem', marginBottom: '1.5rem' }}>
                     {campSubs.length} Approved Deliverables
                   </p>
-                  <Button variant="secondary" fullWidth onClick={() => alert('Feature incoming: Campaign-wide aggregate analytics')}>
-                    View Campaign Report
+                  <Button variant="secondary" fullWidth onClick={() => setActiveCampaignViewId(camp.id)}>
+                    View Campaign Overview
                   </Button>
                </Card>
              );
           })}
         </div>
       )}
-      {activeTab === 'archived' && (
+      {activeTab === 'archived' && !activeCampaignViewId && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
           {archivedCampaigns.length === 0 ? <p>No archived campaigns found.</p> : archivedCampaigns.map(camp => {
              return (
-               <Card key={camp.id} style={{ opacity: 0.7 }}>
+               <Card key={camp.id} style={{ opacity: 0.7, cursor: 'pointer' }} onClick={() => setActiveCampaignViewId(camp.id)}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{camp.title}</h3>
                   <Badge status={camp.status} />
                </Card>
