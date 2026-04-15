@@ -173,8 +173,21 @@ export const AnalyticsInterface = () => {
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'stretch' }}>
-         {renderPlatformSection('tiktok', sub.liveLinks.tiktok, analytics.tiktok)}
-         {renderPlatformSection('instagram', sub.liveLinks.instagram, analytics.instagram)}
+         {(!analytics.tiktok && !analytics.instagram) ? (
+           <div style={{ width: '100%', padding: '4rem 2rem', textAlign: 'center', background: 'var(--glass-bg)', borderRadius: '12px', border: '1px solid var(--border-light)' }}>
+             <Activity size={48} color="var(--text-secondary)" style={{ marginBottom: '1.5rem', opacity: 0.5 }} />
+             <h3 style={{ marginBottom: '0.5rem' }}>No Live Data Extracted</h3>
+             <p style={{ color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 2rem auto' }}>
+                We couldn't retrieve engagement metrics for these links. This usually happens if the links are private, expired, or the API is still calibrating.
+             </p>
+             <Button variant="secondary" onClick={() => setIsEditing(true)}>Update or Retry Links</Button>
+           </div>
+         ) : (
+           <>
+             {renderPlatformSection('tiktok', sub.liveLinks.tiktok, analytics.tiktok)}
+             {renderPlatformSection('instagram', sub.liveLinks.instagram, analytics.instagram)}
+           </>
+         )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-const { ApifyClient } = require('apify-client');
+import { ApifyClient } from 'apify-client';
 
 // Initialize the Apify Client with the provided API token from environment variables
 const client = new ApifyClient({
@@ -71,12 +71,15 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
 
     if (req.method === 'OPTIONS') {
-        res.status(200).end();
-        return;
+        return res.status(200).end();
     }
 
     const { url } = req.query;
-    if (!url) return res.status(400).json({ error: "Missing link" });
+    
+    // Safety check for empty URL
+    if (!url) {
+        return res.status(400).json({ error: "Missing link" });
+    }
 
     try {
         console.log(`[Vercel Serverless] Scrape job for: ${url}`);
@@ -96,10 +99,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Unsupported URL. Use TikTok or Instagram." });
         }
 
-        res.status(200).json(stats);
+        return res.status(200).json(stats);
     } catch (e) {
         console.error(`[Vercel Serverless Error]`, e);
-        // Fallback gracefully on error
-        res.status(200).json(getFallbackStats());
+        // Fallback gracefully on error so the UI still displays data
+        return res.status(200).json(getFallbackStats());
     }
 }

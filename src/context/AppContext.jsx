@@ -247,7 +247,8 @@ export const AppProvider = ({ children }) => {
   }
 
   const updateLiveLinks = async (id, links) => {
-    setSubmissions(submissions.map(sub => {
+    // Phase 1: Start Scraping
+    setSubmissions(prev => prev.map(sub => {
       if (sub.id === id) {
         return { ...sub, liveLinks: links, isScraping: true };
       }
@@ -273,12 +274,13 @@ export const AppProvider = ({ children }) => {
       console.error("Scraping failed:", error);
     }
 
+    // Phase 2: Finish Scraping
     setSubmissions(prev => prev.map(sub => {
       if (sub.id === id) {
         return {
           ...sub,
           isScraping: false,
-          analytics: (newAnalytics.tiktok || newAnalytics.instagram) ? newAnalytics : sub.analytics 
+          analytics: (newAnalytics.tiktok || newAnalytics.instagram) ? newAnalytics : (sub.analytics || {})
         };
       }
       return sub;
