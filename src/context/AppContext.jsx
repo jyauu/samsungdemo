@@ -284,7 +284,8 @@ export const AppProvider = ({ children }) => {
             ? { 
                 ...newAnalytics, 
                 isMock: (newAnalytics.tiktok?.isMock || newAnalytics.instagram?.isMock || false),
-                debug: (newAnalytics.tiktok?.debug || newAnalytics.instagram?.debug)
+                debug: (newAnalytics.tiktok?.debug || newAnalytics.instagram?.debug),
+                debugError: (newAnalytics.tiktok?.debugError || newAnalytics.instagram?.debugError)
               } 
             : (sub.analytics || {})
         };
