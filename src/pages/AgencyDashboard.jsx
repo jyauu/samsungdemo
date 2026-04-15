@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Clock, Activity, Plus, MailOpen, Edit3, ClipboardList, Send, X, UploadCloud } from 'lucide-react';
+import { CheckCircle, Clock, Activity, Plus, MailOpen, Edit3, ClipboardList, Send, X, UploadCloud, Archive } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -9,7 +9,7 @@ import { Input, Textarea } from '../components/ui/Form';
 import './Dashboard.css';
 
 export const AgencyDashboard = () => {
-  const { campaigns, submissions, addCampaign, updateCampaign } = useAppContext();
+  const { campaigns, submissions, addCampaign, updateCampaign, archiveCampaign } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('existing');
   const [activeCampaignViewId, setActiveCampaignViewId] = useState(null);
@@ -62,6 +62,7 @@ export const AgencyDashboard = () => {
 
   const activeCampaigns = campaigns.filter(c => c.status === 'Active');
   const completedCampaigns = campaigns.filter(c => c.status === 'Completed');
+  const archivedCampaigns = campaigns.filter(c => c.status === 'Archived');
 
   return (
     <div className="animate-fade-in" style={{ paddingBottom: '4rem' }}>
@@ -81,6 +82,9 @@ export const AgencyDashboard = () => {
         </Button>
         <Button variant={activeTab === 'completed' ? 'primary' : 'outline'} onClick={() => setActiveTab('completed')}>
           <CheckCircle size={16} /> Completed
+        </Button>
+        <Button variant={activeTab === 'archived' ? 'primary' : 'outline'} onClick={() => setActiveTab('archived')}>
+          <Archive size={16} /> Archived
         </Button>
       </div>
 
@@ -239,6 +243,11 @@ export const AgencyDashboard = () => {
                    {!isInviting && (
                      <Button variant="secondary" onClick={() => startInviting(camp.id)}><MailOpen size={16} /> Invite</Button>
                    )}
+                   {camp.status !== 'Archived' && (
+                     <Button variant="outline" onClick={() => { archiveCampaign(camp.id); setActiveCampaignViewId(null); }} style={{ color: 'var(--text-secondary)', borderColor: 'var(--border-light)' }}>
+                       <Archive size={16} /> Archive
+                     </Button>
+                   )}
                  </div>
                </div>
 
@@ -366,6 +375,18 @@ export const AgencyDashboard = () => {
                   <Button variant="secondary" fullWidth onClick={() => alert('Feature incoming: Campaign-wide aggregate analytics')}>
                     View Campaign Report
                   </Button>
+               </Card>
+             );
+          })}
+        </div>
+      )}
+      {activeTab === 'archived' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          {archivedCampaigns.length === 0 ? <p>No archived campaigns found.</p> : archivedCampaigns.map(camp => {
+             return (
+               <Card key={camp.id} style={{ opacity: 0.7 }}>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{camp.title}</h3>
+                  <Badge status={camp.status} />
                </Card>
              );
           })}

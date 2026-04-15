@@ -164,6 +164,15 @@ export const AppProvider = ({ children }) => {
     }));
   };
 
+  const archiveCampaign = (id) => {
+    setCampaigns(campaigns.map(camp => {
+      if (camp.id === id) {
+        return { ...camp, status: 'Archived' };
+      }
+      return camp;
+    }));
+  };
+
   const addSubmission = (data) => {
     const newSub = {
       id: `sub-${Date.now()}`,
@@ -282,7 +291,7 @@ export const AppProvider = ({ children }) => {
   };
 
   return (
-    <AppContext.Provider value={{ role, login, logout, submissions, campaigns, addCampaign, updateCampaign, addSubmission, updateSubmissionStatus, addFeedback, toggleFeedbackStatus, uploadRevision, updateLiveLinks }}>
+    <AppContext.Provider value={{ role, login, logout, submissions, campaigns, addCampaign, updateCampaign, archiveCampaign, addSubmission, updateSubmissionStatus, addFeedback, toggleFeedbackStatus, uploadRevision, updateLiveLinks }}>
       {children}
     </AppContext.Provider>
   );
