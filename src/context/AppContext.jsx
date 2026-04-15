@@ -254,28 +254,22 @@ export const AppProvider = ({ children }) => {
     }));
 
     let newAnalytics = { tiktok: null, instagram: null };
-    const scrapePromises = [];
 
-    // ... (Mock scraping logic untouched)
-    if (links.tiktok) {
-      newAnalytics.tiktok = {
-        views: Math.floor(Math.random() * 80000) + 20000,
-        likes: Math.floor(Math.random() * 15000) + 3000,
-        comments: Math.floor(Math.random() * 1000) + 150,
-        saves: Math.floor(Math.random() * 3000) + 500,
-        shares: Math.floor(Math.random() * 1500) + 100,
-        followerCount: 154000
-      };
-    }
-    if (links.instagram) {
-      newAnalytics.instagram = {
-        views: Math.floor(Math.random() * 50000) + 15000,
-        likes: Math.floor(Math.random() * 10000) + 2000,
-        comments: Math.floor(Math.random() * 500) + 100,
-        saves: Math.floor(Math.random() * 2000) + 300,
-        shares: Math.floor(Math.random() * 800) + 50,
-        followerCount: 154000
-      };
+    try {
+      if (links.tiktok) {
+        const response = await fetch(`/api/scrape?url=${encodeURIComponent(links.tiktok)}`);
+        if (response.ok) {
+          newAnalytics.tiktok = await response.json();
+        }
+      }
+      if (links.instagram) {
+        const response = await fetch(`/api/scrape?url=${encodeURIComponent(links.instagram)}`);
+        if (response.ok) {
+          newAnalytics.instagram = await response.json();
+        }
+      }
+    } catch (error) {
+      console.error("Scraping failed:", error);
     }
 
     setSubmissions(prev => prev.map(sub => {
@@ -283,7 +277,7 @@ export const AppProvider = ({ children }) => {
         return {
           ...sub,
           isScraping: false,
-          analytics: (newAnalytics.tiktok || newAnalytics.instagram) ? newAnalytics : sub.analytics // retain old if both empty
+          analytics: (newAnalytics.tiktok || newAnalytics.instagram) ? newAnalytics : sub.analytics 
         };
       }
       return sub;
