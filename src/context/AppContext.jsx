@@ -281,7 +281,11 @@ export const AppProvider = ({ children }) => {
           ...sub,
           isScraping: false,
           analytics: (newAnalytics.tiktok || newAnalytics.instagram) 
-            ? { ...newAnalytics, isMock: (newAnalytics.tiktok?.isMock || newAnalytics.instagram?.isMock || false) } 
+            ? { 
+                ...newAnalytics, 
+                isMock: (newAnalytics.tiktok?.isMock || newAnalytics.instagram?.isMock || false),
+                debug: (newAnalytics.tiktok?.debug || newAnalytics.instagram?.debug)
+              } 
             : (sub.analytics || {})
         };
       }
