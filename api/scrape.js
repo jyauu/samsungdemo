@@ -1,10 +1,5 @@
 import { ApifyClient } from 'apify-client';
 
-// Initialize the Apify Client with the provided API token from environment variables
-const client = new ApifyClient({
-    token: process.env.APIFY_API_TOKEN,
-});
-
 // Standardized fallback metrics format
 const getFallbackStats = () => ({
   views: Math.floor(Math.random() * 80000) + 20000,
@@ -15,7 +10,7 @@ const getFallbackStats = () => ({
   followerCount: 154000
 });
 
-async function scrapeTikTokApify(url) {
+async function scrapeTikTokApify(client, url) {
     const input = {
         postURLs: [url],
         resultsPerPage: 1,
@@ -39,7 +34,7 @@ async function scrapeTikTokApify(url) {
     throw new Error("No items returned from Apify TikTok Scraper");
 }
 
-async function scrapeInstagramApify(url) {
+async function scrapeInstagramApify(client, url) {
     const input = {
         directUrls: [url],
         resultsType: "details",
@@ -75,26 +70,33 @@ export default async function handler(req, res) {
     }
 
     const { url } = req.query;
-    
-    // Safety check for empty URL
-    if (!url) {
-        return res.status(400).json({ error: "Missing link" });
-    }
+    if (!url) return res.status(400).json({ error: "Missing link" });
+
+    // Move token detection inside the handler for better reliability on Vercel
+    const token = process.env.APIFY_API_TOKEN;
+    const tokenLength = token ? token.length : 0;
 
     try {
-        console.log(`[Vercel Serverless] Scrape job for: ${url}`);
+        console.log(`[Vercel Serverless] Scrape job for: ${url}. Token length detected: ${tokenLength}`);
         
-        // If no token, return fallback immediately
-        if (!process.env.APIFY_API_TOKEN) {
-            console.warn("[Vercel Serverless] APIFY_API_TOKEN not set. Using mock fallbacks.");
-            return res.status(200).json({ ...getFallbackStats(), isMock: true });
+        // If no token or suspiciously short token, return fallback immediately
+        if (!token || tokenLength < 10) {
+            console.warn("[Vercel Serverless] APIFY_API_TOKEN missing or invalid. Using mock fallbacks.");
+            return res.status(200).json({ 
+                ...getFallbackStats(), 
+                isMock: true, 
+                debug: { tokenFound: !!token, tokenLength } 
+            });
         }
+
+        // Initialize client only when we have a valid token
+        const client = new ApifyClient({ token });
 
         let stats;
         if (url.includes('tiktok.com')) {
-            stats = await scrapeTikTokApify(url);
+            stats = await scrapeTikTokApify(client, url);
         } else if (url.includes('instagram.com')) {
-            stats = await scrapeInstagramApify(url);
+            stats = await scrapeInstagramApify(client, url);
         } else {
             return res.status(400).json({ error: "Unsupported URL. Use TikTok or Instagram." });
         }
@@ -102,7 +104,11 @@ export default async function handler(req, res) {
         return res.status(200).json({ ...stats, isMock: false });
     } catch (e) {
         console.error(`[Vercel Serverless Error]`, e);
-        // Fallback gracefully on error so the UI still displays data
-        return res.status(200).json({ ...getFallbackStats(), isMock: true });
+        // Fallback gracefully on error
+        return res.status(200).json({ 
+            ...getFallbackStats(), 
+            isMock: true, 
+            debugError: e.message 
+        });
     }
 }
