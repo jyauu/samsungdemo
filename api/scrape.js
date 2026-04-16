@@ -75,7 +75,7 @@ export default async function handler(req, res) {
 
         let items;
         if (url.includes('tiktok.com')) {
-            items = await callApifyActor("clockworks/tiktok-scraper", token, {
+            items = await callApifyActor("clockworks~tiktok-scraper", token, {
                 postURLs: [url],
                 resultsPerPage: 1
             });
@@ -92,7 +92,7 @@ export default async function handler(req, res) {
                 });
             }
         } else if (url.includes('instagram.com')) {
-            items = await callApifyActor("apify/instagram-scraper", token, {
+            items = await callApifyActor("apify~instagram-scraper", token, {
                 directUrls: [url],
                 resultsType: "details",
                 resultsLimit: 1
