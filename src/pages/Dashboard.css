@@ -88,3 +88,38 @@
 .feedback-text {
   font-size: 0.9rem;
 }
+
+/* Notion-style Progress Bar */
+.progress-container {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+  width: 100px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-cyan);
+  transition: width 0.3s ease;
+}
+
+.creator-section-header {
+  border-top: 1px solid var(--border-light);
+  margin-top: 2rem;
+  padding-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.participant-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.participant-row:last-child {
+  border-bottom: none;
+}
+

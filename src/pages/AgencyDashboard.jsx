@@ -326,35 +326,85 @@ export const AgencyDashboard = () => {
                   </div>
                )}
 
-               {/* Submissions Section */}
-               <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-light)', paddingTop: '2rem' }}>
-                 <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Deliverables</h3>
-                 {campSubs.length === 0 ? (
-                   <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No submissions yet...</p>
-                 ) : (
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {campSubs.map(sub => (
-                         <div key={sub.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
-                            <div>
-                               <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>{sub.title} <Badge status={sub.status} /></strong>
-                               <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>By @{sub.creatorName}</span>
+                {/* Participants Summary Section */}
+                <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border-light)', paddingTop: '2rem', marginBottom: '3rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Participants</h3>
+                  {Array.from(new Set(campSubs.map(s => s.creatorName))).length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No creators assigned yet...</p>
+                  ) : (
+                    <div style={{ background: 'var(--glass-bg)', padding: '1.5rem', borderRadius: '12px' }}>
+                      {Array.from(new Set(campSubs.map(s => s.creatorName))).map(creator => {
+                        const creatorSubs = campSubs.filter(s => s.creatorName === creator);
+                        const completed = creatorSubs.filter(s => s.status === 'Approved').length;
+                        const total = creatorSubs.length;
+                        const percent = total > 0 ? (completed / total) * 100 : 0;
+                        
+                        return (
+                          <div key={creator} className="participant-row">
+                            <span style={{ fontWeight: 600 }}>{creator}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div className="progress-container">
+                                  <div className="progress-fill" style={{ width: `${percent}%` }}></div>
+                                </div>
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', minWidth: '40px' }}>
+                                  {completed}/{total}
+                                </span>
+                              </div>
+                              <Badge status={percent === 100 ? 'Completed' : 'Active'} />
                             </div>
-                            <div>
-                               {sub.status === 'Approved' ? (
-                                 <Button variant="secondary" onClick={() => navigate(`/analytics/${sub.id}`)}>
-                                   <Activity size={14} /> Analytics
-                                 </Button>
-                               ) : (
-                                 <Button variant="primary" onClick={() => navigate(`/workspace/${sub.id}`)}>
-                                   Open Workspace &rarr;
-                                 </Button>
-                               )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Grouped Submissions Section */}
+                <div style={{ marginTop: '2rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>Deliverables</h3>
+                  {campSubs.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No submissions yet...</p>
+                  ) : (
+                    <div>
+                      {Array.from(new Set(campSubs.map(s => s.creatorName))).map(creator => {
+                        const creatorSubs = campSubs.filter(s => s.creatorName === creator);
+                        return (
+                          <div key={creator} className="creator-group">
+                            <div className="creator-section-header">
+                              <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                {creator}
+                              </span>
                             </div>
-                         </div>
-                      ))}
-                   </div>
-                 )}
-               </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                              {creatorSubs.map(sub => (
+                                <div key={sub.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-light)' }}>
+                                   <div>
+                                      <strong style={{ fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                        {sub.title} <Badge status={sub.status} />
+                                      </strong>
+                                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Last updated {new Date(sub.submittedAt).toLocaleDateString()}</span>
+                                   </div>
+                                   <div>
+                                      {sub.status === 'Approved' ? (
+                                        <Button variant="secondary" onClick={() => navigate(`/analytics/${sub.id}`)}>
+                                          <Activity size={14} /> Analytics
+                                        </Button>
+                                      ) : (
+                                        <Button variant="primary" onClick={() => navigate(`/workspace/${sub.id}`)} style={{ fontSize: '0.85rem' }}>
+                                          Workspace &rarr;
+                                        </Button>
+                                      )}
+                                   </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>  </div>
 
              </div>
            </div>
