@@ -404,8 +404,7 @@ export const AgencyDashboard = () => {
                       })}
                     </div>
                   )}
-                </div>  </div>
-
+                </div>
              </div>
            </div>
          );
